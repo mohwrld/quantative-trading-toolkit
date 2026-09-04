@@ -15,6 +15,13 @@ print("=" * 40)
 print("Stock:", ticker.ticker)
 print("Period:", period)
 
+info = ticker.info
+market_cap = info.get("marketCap")
+pe_ratio = info.get("trailingPE")
+
+print(f"Market Cap: ${market_cap:,}")
+print(f"P/E Ratio: {pe_ratio:.2f}")
+
 ## print(data)
 
 closing_prices = data["Close"]

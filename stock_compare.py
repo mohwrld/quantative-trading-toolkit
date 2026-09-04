@@ -73,7 +73,7 @@ best_sharpe = results_df["Sharpe"].idxmax()
 
 print(f"Best Return: {best_return} ({display_df.loc[best_return, 'Return']})")
 print(f"Lowest Max Drawdown: {best_drawdown} ({display_df.loc[best_drawdown, 'Max Drawdown']})")
-print(f"Best Risk-Adjused Performance: {best_sharpe} ({display_df.loc[best_sharpe, 'Sharpe']})")
+print(f"Best Risk-Adjusted Performance: {best_sharpe} ({display_df.loc[best_sharpe, 'Sharpe']})")
 
 if period in ["1mo", "3mo"]:
     locator = mdates.WeekdayLocator()
