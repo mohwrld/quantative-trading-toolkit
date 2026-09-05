@@ -19,8 +19,16 @@ info = ticker.info
 market_cap = info.get("marketCap")
 pe_ratio = info.get("trailingPE")
 
-print(f"Market Cap: ${market_cap:,}")
-print(f"P/E Ratio: {pe_ratio:.2f}")
+if market_cap is not None:
+    print(f"Market Cap: ${market_cap:,}")
+else:
+    print("Market Cap: N/A")
+
+if pe_ratio is not None:
+    print(f"P/E Ratio: {pe_ratio:.2f}")
+else:
+    print("P/E Ratio: N/A")
+
 
 ## print(data)
 
@@ -44,6 +52,9 @@ daily_returns = closing_prices.pct_change()
 average_daily_return = daily_returns.mean()
 print(f"Average Daily Return: {average_daily_return * 100:.2f}%")
 
+win_rate = (daily_returns > 0).mean()
+print(f"Win Rate: {win_rate * 100:.2f}%")
+
 print("\nRISK")
 print("-" * 40)
 
@@ -64,6 +75,9 @@ print(f"Daily Sharpe Ratio: {sharpe_ratio:.2f}")
 
 annualized_sharpe = (average_daily_return / volatility) * (252 ** 0.5)
 print(f"Annualized Sharpe Ratio: {annualized_sharpe:.2f}")
+
+average_loss = daily_returns[daily_returns < 0].mean()
+print(f"Average Loss:${average_loss:.2f}")
 
 if period in ["1mo", "3mo"]:
     locator = mdates.WeekdayLocator()
@@ -96,5 +110,13 @@ plt.gca().xaxis.set_major_locator(locator)
 plt.gca().xaxis.set_major_formatter(formatter)
 plt.xticks(rotation=30)
 plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(7,5))
+plt.hist(daily_returns.dropna(), bins = 50)
+plt.title(f"{ticker.ticker} Daily Returns Distribution")
+plt.xlabel("Daily Return")
+plt.ylabel("Frequency")
 plt.tight_layout()
 plt.show()
