@@ -1,6 +1,7 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import PercentFormatter
 
 symbol = input("Enter Stock Ticker: ").upper()
 period = input("Enter Period: (1mo, 3mo, 6mo, 1y, 5y, max) ").lower()
@@ -17,18 +18,24 @@ print("Period:", period)
 
 info = ticker.info
 market_cap = info.get("marketCap")
-pe_ratio = info.get("trailingPE")
+trailing_pe = info.get("trailingPE")
+forward_pe = info.get("forwardPE")
+cash = info.get("totalCash")
+total_debt = info.get("totalDebt")
+debt_to_equity = info.get("debtToEquity")
 
-if market_cap is not None:
-    print(f"Market Cap: ${market_cap:,}")
-else:
-    print("Market Cap: N/A")
 
-if pe_ratio is not None:
-    print(f"P/E Ratio: {pe_ratio:.2f}")
-else:
-    print("P/E Ratio: N/A")
+print(f"Market Cap: ${market_cap:,}" if market_cap is not None else "Market Cap: N/A")
 
+print(f"Trailing P/E: {trailing_pe:.2f}" if trailing_pe else "Trailing P/E: N/A")
+
+print(f"Forward P/E: {forward_pe:.2f}" if forward_pe else "Forward P/E: N/A")
+
+print(f"Cash: ${cash:,}" if cash else "Cash: N/A")
+
+print(f"Total Debt: ${total_debt:,}" if total_debt else "Total Debt: N/A")
+
+print(f"Debt-to-Equity: {debt_to_equity:.2f}x" if debt_to_equity else "Debt-to-Equity: N/A")
 
 ## print(data)
 
@@ -61,6 +68,8 @@ print("-" * 40)
 volatility = daily_returns.std()
 print(f"Daily Volatility: {volatility * 100:.2f}%")
 
+rolling_volatility = (daily_returns.rolling(20).std()) * (252 ** 0.5)
+
 cumulative_returns = (1 + daily_returns).cumprod()
 total_return = ((cumulative_returns.iloc[-1] - 1) * 100)
 ## print(f"Total Return: {total_return:.2f}%")
@@ -76,8 +85,13 @@ print(f"Daily Sharpe Ratio: {sharpe_ratio:.2f}")
 annualized_sharpe = (average_daily_return / volatility) * (252 ** 0.5)
 print(f"Annualized Sharpe Ratio: {annualized_sharpe:.2f}")
 
+average_gain = daily_returns[daily_returns > 0].mean()
+print(f"Average Gain: {average_gain:.2%}")
+
 average_loss = daily_returns[daily_returns < 0].mean()
-print(f"Average Loss:${average_loss:.2f}")
+print(f"Average Loss: {average_loss:.2%}")
+
+
 
 if period in ["1mo", "3mo"]:
     locator = mdates.WeekdayLocator()
@@ -113,10 +127,27 @@ plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
 
+average_return = daily_returns.mean()
+
 plt.figure(figsize=(7,5))
 plt.hist(daily_returns.dropna(), bins = 50)
 plt.title(f"{ticker.ticker} Daily Returns Distribution")
 plt.xlabel("Daily Return")
 plt.ylabel("Frequency")
+plt.gca().xaxis.set_major_formatter(PercentFormatter(1))
+plt.axvline(average_return, color="black", linestyle="--", linewidth=1.0, label=f"Average: {average_return:.2%}")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(7,5))
+plt.plot(rolling_volatility * 100)
+plt.title(f"{ticker.ticker} 20-Day Rolling Volatility")
+plt.xlabel("Date")
+plt.ylabel("Annualized Volatility (%)")
+plt.gca().xaxis.set_major_locator(locator)
+plt.gca().xaxis.set_major_formatter(formatter)
+plt.xticks(rotation=30)
+plt.grid(alpha=0.3)
 plt.tight_layout()
 plt.show()
